@@ -1,5 +1,6 @@
 package com.example.desafio2;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -13,15 +14,21 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 public class ProdutoAdapter extends RecyclerView.Adapter<ProdutoViewHolder> {
 
     private Context context;
     private ArrayList<Produto> itens;
+    private ProdutoDatabse produtoDb;
 
-    public ProdutoAdapter(Context context, ArrayList<Produto> itens) {
+
+    public ProdutoAdapter(Context context, ArrayList<Produto> itens, ProdutoDatabse produtoDb) {
         this.context = context;
         this.itens = itens;
+        this.produtoDb = produtoDb;
     }
 
     @NonNull
@@ -52,10 +59,18 @@ public class ProdutoAdapter extends RecyclerView.Adapter<ProdutoViewHolder> {
                         .setPositiveButton("Sim", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
-                                int item = produtoViewHolder.getAdapterPosition();
-                                itens.remove(item);
-                                notifyItemRemoved(item);
-                                notifyItemRangeChanged(item, getItemCount());
+                                int position = produtoViewHolder.getAdapterPosition();
+
+                                Executor executor = Executors.newSingleThreadExecutor();
+                                executor.execute(() -> {
+                                    produtoDb.getProdutoDAO().deleteProduto(produto);
+
+                                    ((Activity)context).runOnUiThread(() -> {
+                                        itens.remove(position);
+                                        notifyItemRemoved(position);
+                                        notifyItemRangeChanged(position, getItemCount());
+                                    });
+                                });
                             }
                         })
                         .setNegativeButton("Não", null)

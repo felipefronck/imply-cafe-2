@@ -12,6 +12,7 @@ import androidx.room.Room;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -29,16 +30,18 @@ public class MainActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
 
+        produtoDb = Room.databaseBuilder(getApplicationContext(), ProdutoDatabse.class, "ProdutoDb")
+                .fallbackToDestructiveMigration()
+                .build();
+
         recycler = findViewById(R.id.recycler);
         itens = new ArrayList<>();
-        adapter = new ProdutoAdapter(MainActivity.this, itens);
+        adapter = new ProdutoAdapter(MainActivity.this, itens, produtoDb);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(MainActivity.this, LinearLayoutManager.VERTICAL, false);
         recycler.setLayoutManager(layoutManager);
         recycler.setAdapter(adapter);
 
-        produtoDb = Room.databaseBuilder(getApplicationContext(), ProdutoDatabse.class, "ProdutoDb")
-                .fallbackToDestructiveMigration()
-                .build();
+        carregaDatabase();
 
         FloatingActionButton btnAdd = findViewById(R.id.btnAdd);
         btnAdd.setOnClickListener(new View.OnClickListener() {
@@ -53,6 +56,19 @@ public class MainActivity extends AppCompatActivity {
     private void adicionarProdutos() {
         Intent intent = new Intent(MainActivity.this, ProdutoAdd.class);
         startActivityForResult(intent, 1);
+    }
+
+    private void carregaDatabase(){
+        Executor executor = Executors.newSingleThreadExecutor();
+        executor.execute(() -> {
+            List<Produto> produtos = produtoDb.getProdutoDAO().getAllProdutos();
+
+            runOnUiThread(() -> {
+                itens.clear();
+                itens.addAll(produtos);
+                adapter.notifyDataSetChanged();
+            });
+        });
     }
 
     @Override
