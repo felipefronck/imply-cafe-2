@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:padding="16dp"
+    tools:context=".ProdutoAdd">
+
+    <ImageView
+        android:id="@+id/imgPreviewAdd"
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        android:src="@mipmap/ic_blank_img"/>
+
+    <EditText
+        android:id="@+id/nomeProdutoAdd"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Nome produto"
+        android:layout_below="@id/imgPreviewAdd"
+        android:layout_marginTop="20dp"/>
+
+    <EditText
+        android:id="@+id/descProdutoAdd"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Descricao produto"
+        android:layout_below="@id/nomeProdutoAdd"
+        android:layout_marginTop="20dp"/>
+
+    <EditText
+        android:id="@+id/precoProdutoAdd"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Preco produto"
+        android:inputType="numberDecimal"
+        android:layout_below="@id/descProdutoAdd"
+        android:layout_marginTop="20dp"/>
+
+
+    <Button
+        android:id="@+id/btnSalvarProduto"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerInParent="true"
+        android:text="Salvar"
+        android:textAllCaps="true"/>
+</RelativeLayout>
