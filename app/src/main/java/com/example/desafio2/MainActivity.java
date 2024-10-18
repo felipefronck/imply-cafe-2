@@ -8,14 +8,20 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.collection.ArraySet;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.room.Room;
+
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.util.ArrayList;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 public class MainActivity extends AppCompatActivity {
 
     private RecyclerView recycler;
     private ProdutoAdapter adapter;
     private ArrayList<Produto> itens;
+
+    private ProdutoDatabse produtoDb;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,11 +36,16 @@ public class MainActivity extends AppCompatActivity {
         recycler.setLayoutManager(layoutManager);
         recycler.setAdapter(adapter);
 
+        produtoDb = Room.databaseBuilder(getApplicationContext(), ProdutoDatabse.class, "ProdutoDb")
+                .fallbackToDestructiveMigration()
+                .build();
+
         FloatingActionButton btnAdd = findViewById(R.id.btnAdd);
         btnAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 adicionarProdutos();
+
             }
         });
     }
@@ -59,27 +70,40 @@ public class MainActivity extends AppCompatActivity {
                 addProductToRecyclerView(imageUrl, name, description, price);
             } else if (requestCode == 2 && id != -1){
                 updateProductInRecyclerView(id, imageUrl, name, description, price);
-                }
             }
         }
+    }
 
     private void addProductToRecyclerView(String imageUrl, String productName, String productDescription, Double productPrice) {
-        int id = itens.size() + 1;
-        Produto newProduct = new Produto(id, imageUrl, productName, productDescription, productPrice);
-        itens.add(newProduct);
-        adapter.notifyItemInserted(itens.size() - 1);
+        Produto newProduto = new Produto(imageUrl, productName, productDescription, productPrice);
+
+        Executor executor = Executors.newSingleThreadExecutor();
+        executor.execute(() -> {
+            produtoDb.getProdutoDAO().addProduto(newProduto);
+            runOnUiThread(() -> {
+                itens.add(newProduto);
+                adapter.notifyItemInserted(itens.size() - 1);
+            });
+        });
     }
 
     private void updateProductInRecyclerView(int id, String imageUrl, String productName, String productDescription, Double productPrice) {
         for (int i = 0; i < itens.size(); i++) {
+            final int position = i;
             Produto produto = itens.get(i);
             if (produto.getId() == id) {
                 produto.setNomeProduto(productName);
                 produto.setDescProduto(productDescription);
                 produto.setPrecoProduto(productPrice);
                 produto.setImgProduto(imageUrl);
+                Executor executor = Executors.newSingleThreadExecutor();
+                executor.execute(() -> {
+                    produtoDb.getProdutoDAO().updateProduto(produto);
+                    runOnUiThread(() -> {
+                        adapter.notifyItemChanged(position);
+                    });
+                });
 
-                adapter.notifyItemChanged(i);
                 break;
             }
         }

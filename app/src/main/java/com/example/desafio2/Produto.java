@@ -1,13 +1,26 @@
 package com.example.desafio2;
 
+import androidx.room.ColumnInfo;
+import androidx.room.PrimaryKey;
+import androidx.room.Entity;
+
+@Entity(tableName = "Produto")
 public class Produto {
 
+    @ColumnInfo(name = "id_produto")
+    @PrimaryKey(autoGenerate = true)
     private int id;
+    @ColumnInfo(name = "preco_produto")
     private Double precoProduto;
-    private String nomeProduto, descProduto, imgProduto;
+    @ColumnInfo(name = "nome_produto")
+    private String nomeProduto;
+    @ColumnInfo(name = "desc_produto")
+    private String descProduto;
+    @ColumnInfo(name = "img_produto")
+    private String imgProduto;;
 
-    public Produto(int id, String imgProduto, String nomeProduto , String descProduto, Double precoProduto) {
-        this.id = id;
+    public Produto(String imgProduto, String nomeProduto , String descProduto, Double precoProduto) {
+        this.id = 0;
         this.imgProduto = imgProduto;
         this.nomeProduto = nomeProduto;
         this.descProduto = descProduto;
